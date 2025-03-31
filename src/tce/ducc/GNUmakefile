@@ -1,11 +1,11 @@
 #$Id$
 
-OBJ_OPTIMIZE =  map_hcore.o rot_vir.o ducc.o hh.o hp.o pp.o hhhh.o pppp.o hhhp.o ppph.o hhpp.o hphp.o
+OBJ_OPTIMIZE =  map_hcore.o rot_vir.o ducc.o hh.o hp.o pp.o hhhh.o pppp.o hhhp.o ppph.o hhpp.o hphp.o fci_string.o
 LIB_INCLUDES = -I../include
 
 LIBRARY = libtce.a
 
-USES_BLAS = rot_vir.F map_hcore.F
+USES_BLAS = rot_vir.F map_hcore.F fci_string.F
 
 LIB_DEFINES = -DDEBUG_PRINT
 

@@ -573,6 +573,7 @@ cducc
       logical do_ccd, do_lccd, do_ccsd, do_lccsd, do_qcisd
       logical do_pt, do_lam_pt, do_cr_pt, do_lcr_pt, do_2t_pt
 !
+      integer nstot
 !     Fragment extension
 !
       logical excitedfragment
@@ -3105,6 +3106,62 @@ c
      2         k_t1_offset,k_t2_offset,
      3         size_t1,size_t2,ref,corr,rtdb)
 !QuantumComputing
+c
+c --- fci_uhf_string module ---
+c parameters:
+       if(nodezero) then
+        write(6,*)'step in tce_ene 1'
+        call util_flush(6)
+       endif
+c
+       nos=int_mb(k_offset+noab-1)+int_mb(k_range+noab-1)
+       nvs=int_mb(k_offset+noab+nvab-1)+int_mb(k_range+noab+nvab-1)
+     &     -nos
+       noas = int_mb(k_offset+noa-1)+int_mb(k_range+noa-1)
+       nobs = int_mb(k_offset+noab-1)+int_mb(k_range+noab-1)-noas
+       nvas = int_mb(k_offset+noab+nva-1)+int_mb(k_range+noab+nva-1)
+     &        -(noas+nobs)
+       nvbs = int_mb(k_offset+noab+nvab-1)+int_mb(k_range+noab+nvab-1)
+     &            -(noas+nobs+nvas)
+c
+       nstot = nos+nvs
+c
+c         if(nodezero) then
+c          write(6,*)' nos ',nos
+c          write(6,*)' nvs ',nvs
+c          write(6,*)'noas ',noas
+c           write(6,*)'nobs ',nobs
+c          write(6,*)'nvas ',nvas
+c          write(6,*)'nvbs ',nvbs
+c          write(6,*)'nstot ',nstot
+c          call util_flush(6)
+c         endif
+c
+           if (.not. geom_nuc_rep_energy(geom, enrep_tce))
+     &      call errquit('TCE:unable to get nuclear rep ',geom,
+     &      GEOM_ERR)
+c
+        if (.not.MA_PUSH_GET(mt_dbl,(nos+nvs)**2,'h',
+     1      l_h,k_h))
+     1      call errquit('h',200,MA_ERR)
+        if (.not.MA_PUSH_GET(mt_dbl,(nos+nvs)**4,'v',
+     1      l_v,k_v))
+     1      call errquit('v',202,MA_ERR)
+c
+        call fci_uhf_string(rtdb,
+     &    d_v2,k_v2_offset,
+     &    nos,nvs,noas,nobs,nvas,nvbs,
+     &    nstot,dbl_mb(k_h),dbl_mb(k_v),enrep_tce)
+c
+c
+        if (.not.MA_POP_STACK(l_v))
+     1   call errquit("l_v",0,MA_ERR)
+        if (.not.MA_POP_STACK(l_h))
+     1   call errquit("l_h",0,MA_ERR)
+c
+c
+c ---- fci ---
+c
           if(quantumc) then
           if(nodezero) then
            write(6,*)'Ground state specification:'
